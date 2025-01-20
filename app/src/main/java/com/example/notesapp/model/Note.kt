@@ -1,5 +1,13 @@
 package com.example.notesapp.model
 
-data class Note(val title: String, val desc: String)
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "notes")
+data class Note(
+    @PrimaryKey(autoGenerate = true) val uid: Int,
+    val title: String,
+    val desc: String
+)
 
 
