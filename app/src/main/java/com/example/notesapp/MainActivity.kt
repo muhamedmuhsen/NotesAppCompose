@@ -6,9 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.example.notesapp.screens.InsertNote
 import com.example.notesapp.screens.NotesScreen
 import com.example.notesapp.ui.theme.NotesAppTheme
+import kotlinx.serialization.Serializable
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,11 +24,39 @@ class MainActivity : ComponentActivity() {
         setContent {
             NotesAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val pad=innerPadding
-                    NotesScreen()
+                    val padding=innerPadding
+                    val navController = rememberNavController()
+                    NavHost(
+                        navController=navController,
+                        startDestination = NotesScreen
+                    ){
+                        composable <NotesScreen>{
+                            NotesScreen(navController=navController)
+                        }
+                        composable <InsertNoteScreen>{
+
+                            InsertNote(
+                                titleU = null,
+                                descU = null
+                            )
+                        }
+                        composable <UpdateNoteScreen>{
+                            val args=it.toRoute<UpdateNoteScreen>()
+                            InsertNote(titleU = args.title, descU = args.desc)
+                        }
+                    }
+
                 }
             }
         }
     }
 }
 
+@Serializable
+object NotesScreen
+
+@Serializable
+object InsertNoteScreen
+
+@Serializable
+data class UpdateNoteScreen(val title:String,val desc:String)

@@ -40,7 +40,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.notesapp.InsertNoteScreen
 import com.example.notesapp.NotesViewModel.NoteViewModel
+import com.example.notesapp.UpdateNoteScreen
 import com.example.notesapp.model.Note
 import com.example.notesapp.ui.theme.background
 import com.example.notesapp.ui.theme.button
@@ -49,14 +53,18 @@ import com.example.notesapp.ui.theme.text
 
 @Preview(showSystemUi = true)
 @Composable
- fun NotesScreen(viewModel: NoteViewModel = viewModel()) {
+fun NotesScreen(
+    viewModel: NoteViewModel = viewModel(),
+    navController: NavHostController = rememberNavController()
+) {
     val notes by viewModel.getAllNotes().observeAsState(initial = emptyList())
-
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = {
+                    navController.navigate(InsertNoteScreen)
+                },
                 contentColor = Color.White,
                 containerColor = button,
                 shape = CircleShape
@@ -82,8 +90,12 @@ import com.example.notesapp.ui.theme.text
                 color = text
             )
             LazyColumn {
-                items(notes) {note->
-                    ListShape(note, onDelete = {}, onUpdate = {})
+                items(notes) { note ->
+                    ListShape(note, onDelete = {
+                        viewModel.delete(note)
+                    }, onUpdate = {
+                        navController.navigate(UpdateNoteScreen(note.title,note.desc))
+                    })
                 }
             }
         }
@@ -132,10 +144,12 @@ fun NotesScreenPreview() {
 
 // Fake ViewModel for Preview
 class FakeViewModel : NoteViewModel(Application()) {
-    override fun getAllNotes() = MutableLiveData(listOf(
-        Note(1, "Sample Note 1", "Description 1"),
-        Note(2, "Sample Note 2", "Description 2")
-    ))
+    override fun getAllNotes() = MutableLiveData(
+        listOf(
+            Note(1, "Sample Note 1", "Description 1"),
+            Note(2, "Sample Note 2", "Description 2")
+        )
+    )
 }
 
 
@@ -193,3 +207,4 @@ private fun NoteMenu(
         }
     }
 }
+

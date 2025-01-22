@@ -15,10 +15,17 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -26,18 +33,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.notesapp.NotesViewModel.NoteViewModel
+import com.example.notesapp.model.Note
 import com.example.notesapp.ui.theme.background
 import com.example.notesapp.ui.theme.button
 import com.example.notesapp.ui.theme.listShapeBackground
 import com.example.notesapp.ui.theme.text
+import kotlinx.coroutines.launch
 
-@Preview(showSystemUi = true)
+
 @Composable
-private fun InsertNote() {
+fun InsertNote(viewModel: NoteViewModel = viewModel(), titleU: String?, descU: String?) {
+    var title by remember { if (titleU == null) mutableStateOf("") else mutableStateOf(titleU) }
+    var desc by remember { if (descU == null) mutableStateOf("") else mutableStateOf(descU) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = {
+                    if (title.isBlank() || desc.isBlank()) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                "Please fill the missing fields!"
+                            )
+                        }
+                    } else {
+                        viewModel.upsert(Note(title = title, desc = desc))
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                "Note Saved!"
+                            )
+                        }
+                    }
+                },
                 contentColor = Color.White,
                 containerColor = button,
                 shape = CircleShape
@@ -64,15 +97,18 @@ private fun InsertNote() {
             )
             Spacer(Modifier.height(24.dp))
             TextField(
-                value = "",
-                onValueChange = {},
+                value = title,
+                onValueChange = { title = it },
                 label = { Text(text = "Title", color = text) },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = listShapeBackground,
                     unfocusedContainerColor = listShapeBackground,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = text,
+                    unfocusedTextColor = text
+
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,8 +116,8 @@ private fun InsertNote() {
             )
             Spacer(Modifier.height(16.dp))
             TextField(
-                value = "",
-                onValueChange = {},
+                value = desc,
+                onValueChange = { desc = it },
                 label = {
                     Text(
                         text = "Enter description",
@@ -92,7 +128,9 @@ private fun InsertNote() {
                     focusedContainerColor = listShapeBackground,
                     unfocusedContainerColor = listShapeBackground,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = text,
+                    unfocusedTextColor = text
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,3 +141,4 @@ private fun InsertNote() {
         }
     }
 }
+
