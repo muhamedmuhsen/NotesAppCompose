@@ -31,6 +31,10 @@ open class NoteViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun getNoteById(id: Int): LiveData<Note?> {
+        return repository.getNoteById(id)
+    }
+
     open fun getAllNotes(): LiveData<List<Note>> = repository.getAllNotes()
 
 }

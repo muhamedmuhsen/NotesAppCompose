@@ -94,7 +94,7 @@ fun NotesScreen(
                     ListShape(note, onDelete = {
                         viewModel.delete(note)
                     }, onUpdate = {
-                        navController.navigate(UpdateNoteScreen(note.title,note.desc))
+                        navController.navigate(UpdateNoteScreen(note.id))
                     })
                 }
             }

@@ -6,7 +6,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 
 @Dao
 interface NotesDao {
@@ -18,4 +17,7 @@ interface NotesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsert(note:Note)
+
+    @Query("SELECT * FROM notes WHERE id = :id LIMIT 1")
+    fun getNoteById(id: Int): LiveData<Note?>
 }

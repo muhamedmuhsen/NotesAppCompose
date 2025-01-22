@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,25 +23,23 @@ class MainActivity : ComponentActivity() {
         setContent {
             NotesAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val padding=innerPadding
+                    val padding = innerPadding
                     val navController = rememberNavController()
                     NavHost(
-                        navController=navController,
+                        navController = navController,
                         startDestination = NotesScreen
-                    ){
-                        composable <NotesScreen>{
-                            NotesScreen(navController=navController)
+                    ) {
+                        composable<NotesScreen> {
+                            NotesScreen(navController = navController)
                         }
-                        composable <InsertNoteScreen>{
-
+                        composable<InsertNoteScreen> {
                             InsertNote(
-                                titleU = null,
-                                descU = null
+                                noteID = null
                             )
                         }
-                        composable <UpdateNoteScreen>{
-                            val args=it.toRoute<UpdateNoteScreen>()
-                            InsertNote(titleU = args.title, descU = args.desc)
+                        composable<UpdateNoteScreen> {
+                            val args = it.toRoute<UpdateNoteScreen>()
+                            InsertNote(noteID = args.noteID)
                         }
                     }
 
@@ -59,4 +56,4 @@ object NotesScreen
 object InsertNoteScreen
 
 @Serializable
-data class UpdateNoteScreen(val title:String,val desc:String)
+data class UpdateNoteScreen(val noteID: Int)

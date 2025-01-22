@@ -22,6 +22,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,12 +44,12 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun InsertNote(viewModel: NoteViewModel = viewModel(), titleU: String?, descU: String?) {
-    var title by remember { if (titleU == null) mutableStateOf("") else mutableStateOf(titleU) }
-    var desc by remember { if (descU == null) mutableStateOf("") else mutableStateOf(descU) }
+fun InsertNote(viewModel: NoteViewModel = viewModel(), noteID: Int?) {
+    val note by viewModel.getNoteById(noteID ?: -1).observeAsState()
+    var title by remember(note) { mutableStateOf(note?.title ?: "") }
+    var desc by remember(note) { mutableStateOf(note?.desc ?: "") }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -63,11 +63,21 @@ fun InsertNote(viewModel: NoteViewModel = viewModel(), titleU: String?, descU: S
                             )
                         }
                     } else {
-                        viewModel.upsert(Note(title = title, desc = desc))
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                "Note Saved!"
-                            )
+                        if (note == null) {
+                            viewModel.upsert(Note(title = title, desc = desc))
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    "Note Saved!"
+                                )
+                            }
+                        }
+                        else{
+                            viewModel.upsert(note!!.copy(title=title, desc = desc))
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    "Note Updated!"
+                                )
+                            }
                         }
                     }
                 },
@@ -90,7 +100,7 @@ fun InsertNote(viewModel: NoteViewModel = viewModel(), titleU: String?, descU: S
                 .padding(horizontal = 16.dp)
         ) {
             Text(
-                text = "Insert Data ",
+                text = "Insert Data",
                 fontWeight = FontWeight.Bold,
                 fontSize = 32.sp,
                 color = text
